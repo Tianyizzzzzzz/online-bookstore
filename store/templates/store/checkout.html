@@ -1,0 +1,376 @@
+{% extends 'store/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Checkout - Online Bookstore{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-5">
+            <i class="fas fa-credit-card"></i> Checkout
+        </h1>
+        <p class="lead text-muted">Complete your purchase</p>
+    </div>
+</div>
+
+<!-- Checkout Progress -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="progress-steps">
+            <div class="step completed">
+                <i class="fas fa-shopping-cart"></i>
+                <span>Cart</span>
+            </div>
+            <div class="step-connector"></div>
+            <div class="step active">
+                <i class="fas fa-credit-card"></i>
+                <span>Checkout</span>
+            </div>
+            <div class="step-connector"></div>
+            <div class="step">
+                <i class="fas fa-check"></i>
+                <span>Complete</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form method="post" action="{% url 'checkout' %}">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Shipping Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-truck"></i> Shipping Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        Since this is a digital product, no physical shipping is required.
+                        This information is for billing purposes only.
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            {{ form.shipping_address|as_crispy_field }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.shipping_city|as_crispy_field }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.shipping_state|as_crispy_field }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.shipping_zip_code|as_crispy_field }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.shipping_country|as_crispy_field }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-credit-card"></i> Payment Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Demo Notice:</strong> This is a demonstration checkout.
+                        No actual payment will be processed. In a real implementation,
+                        you would integrate with payment processors like Stripe, PayPal, etc.
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            <label class="form-label">Card Number</label>
+                            <input type="text" class="form-control" placeholder="1234 5678 9012 3456"
+                                   value="4111 1111 1111 1111" readonly>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Expiry Date</label>
+                            <input type="text" class="form-control" placeholder="MM/YY"
+                                   value="12/25" readonly>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">CVV</label>
+                            <input type="text" class="form-control" placeholder="123"
+                                   value="123" readonly>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label">Cardholder Name</label>
+                            <input type="text" class="form-control" placeholder="John Doe"
+                                   value="{{ user.get_full_name }}" readonly>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-center mb-3">
+                        <img src="https://via.placeholder.com/50x30/007bff/ffffff?text=VISA" alt="Visa" class="me-2">
+                        <img src="https://via.placeholder.com/50x30/ff6b35/ffffff?text=MC" alt="Mastercard" class="me-2">
+                        <img src="https://via.placeholder.com/50x30/28a745/ffffff?text=AMEX" alt="American Express" class="me-2">
+                        <img src="https://via.placeholder.com/50x30/ffc107/000000?text=PP" alt="PayPal">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Notes -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-sticky-note"></i> Order Notes (Optional)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <textarea class="form-control" rows="3"
+                              placeholder="Any special instructions or notes for your order..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Order Summary -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-receipt"></i> Order Summary
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Cart Items -->
+                    <div class="mb-3">
+                        {% for item in cart_items %}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-0">{{ item.book.title|truncatechars:25 }}</h6>
+                                <small class="text-muted">{{ item.book.author }}</small>
+                                <small class="text-muted d-block">Qty: {{ item.quantity }}</small>
+                            </div>
+                            <div class="text-end">
+                                <span class="fw-bold">${{ item.total_price }}</span>
+                            </div>
+                        </div>
+                        {% if not forloop.last %}<hr class="my-2">{% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <hr>
+
+                    <!-- Pricing Breakdown -->
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal:</span>
+                        <span>${{ total_amount }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Shipping:</span>
+                        <span class="text-success">FREE</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Tax:</span>
+                        <span>$0.00</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Discount:</span>
+                        <span>-$0.00</span>
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between mb-3">
+                        <strong>Total:</strong>
+                        <strong class="text-primary fs-4">${{ total_amount }}</strong>
+                    </div>
+
+                    <!-- Terms and Conditions -->
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="terms" required>
+                        <label class="form-check-label" for="terms">
+                            I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Terms and Conditions</a>
+                        </label>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-lock"></i> Place Order
+                        </button>
+                        <a href="{% url 'cart' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Cart
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Notice -->
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-shield-alt fa-2x text-success mb-2"></i>
+                    <h6>Secure Checkout</h6>
+                    <small class="text-muted">
+                        Your payment information is encrypted and secure.
+                        We use industry-standard SSL encryption to protect your data.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- Terms and Conditions Modal -->
+<div class="modal fade" id="termsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Terms and Conditions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6>1. Digital Product Delivery</h6>
+                <p>All products are delivered digitally via email within 24 hours of purchase confirmation.</p>
+
+                <h6>2. Refund Policy</h6>
+                <p>We offer a 30-day money-back guarantee for all digital products. Please contact customer support for refund requests.</p>
+
+                <h6>3. Usage Rights</h6>
+                <p>Digital products are licensed for personal use only. Commercial use requires separate licensing.</p>
+
+                <h6>4. Technical Support</h6>
+                <p>Technical support is available 24/7 via email and live chat.</p>
+
+                <h6>5. Privacy Policy</h6>
+                <p>Your personal information is protected according to our privacy policy and will not be shared with third parties.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .progress-steps {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        position: relative;
+    }
+
+    .step i {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 0.5rem;
+        font-size: 1.2rem;
+        border: 2px solid #dee2e6;
+        color: #6c757d;
+        background-color: #f8f9fa;
+    }
+
+    .step.completed i {
+        background-color: #198754;
+        color: white;
+        border-color: #198754;
+    }
+
+    .step.active i {
+        background-color: #0d6efd;
+        color: white;
+        border-color: #0d6efd;
+    }
+
+    .step span {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+
+    .step.completed span,
+    .step.active span {
+        color: #212529;
+        font-weight: 600;
+    }
+
+    .step-connector {
+        width: 100px;
+        height: 2px;
+        background-color: #dee2e6;
+        margin: 0 1rem;
+    }
+
+    .card {
+        border: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .form-check-input:checked {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Form validation
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const termsCheckbox = document.getElementById('terms');
+
+        if (!termsCheckbox.checked) {
+            e.preventDefault();
+            alert('Please accept the terms and conditions to continue.');
+            return false;
+        }
+
+        // Add loading state to submit button
+        const submitBtn = document.querySelector('button[type="submit"]');
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        submitBtn.disabled = true;
+    });
+
+    // Auto-format card number input (if it were real)
+    document.addEventListener('DOMContentLoaded', function() {
+        const cardNumberInput = document.querySelector('input[placeholder="1234 5678 9012 3456"]');
+        if (cardNumberInput) {
+            cardNumberInput.addEventListener('input', function(e) {
+                // Remove all non-digit characters
+                let value = e.target.value.replace(/\D/g, '');
+
+                // Add spaces every 4 digits
+                value = value.replace(/(\d{4})(?=\d)/g, '$1 ');
+
+                // Limit to 19 characters (16 digits + 3 spaces)
+                if (value.length > 19) {
+                    value = value.substring(0, 19);
+                }
+
+                e.target.value = value;
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,239 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block title %}Order History - Online Bookstore{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-5">
+            <i class="fas fa-history"></i> Order History
+        </h1>
+        <p class="lead text-muted">View all your past orders and download your eBooks</p>
+    </div>
+</div>
+
+{% if orders %}
+<div class="row">
+    <div class="col-12">
+        {% for order in orders %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h5 class="mb-0">
+                            <i class="fas fa-receipt"></i> {{ order.order_number }}
+                        </h5>
+                        <small class="text-muted">Placed on {{ order.created_at|date:"F j, Y g:i A" }}</small>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <span class="badge {% if order.status == 'delivered' %}bg-success{% elif order.status == 'shipped' %}bg-info{% elif order.status == 'processing' %}bg-warning{% else %}bg-secondary{% endif %} me-2">
+                            {{ order.get_status_display }}
+                        </span>
+                        <strong class="text-primary">${{ order.total_amount }}</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Order Items -->
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Book</th>
+                                <th>Author</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order.items.all %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        {% if item.book.cover_image %}
+                                            <img src="{{ item.book.cover_image.url }}" alt="{{ item.book.title }}"
+                                                 class="me-2 rounded" style="width: 30px; height: 40px; object-fit: cover;">
+                                        {% else %}
+                                            <div class="me-2 bg-light rounded d-flex align-items-center justify-content-center"
+                                                 style="width: 30px; height: 40px;">
+                                                <i class="fas fa-book text-muted"></i>
+                                            </div>
+                                        {% endif %}
+                                        <div>
+                                            <strong>{{ item.book.title }}</strong><br>
+                                            <small class="text-muted">ISBN: {{ item.book.isbn }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ item.book.author }}</td>
+                                <td>${{ item.price }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td><strong>${{ item.total_price }}</strong></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Order Details -->
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <h6>Shipping Address</h6>
+                        <address class="small">
+                            {{ order.shipping_address }}<br>
+                            {{ order.shipping_city }}, {{ order.shipping_state }} {{ order.shipping_zip_code }}<br>
+                            {{ order.shipping_country }}
+                        </address>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Order Status</h6>
+                        <p class="small">
+                            <strong>Status:</strong> {{ order.get_status_display }}<br>
+                            <strong>Order Date:</strong> {{ order.created_at|date:"F j, Y g:i A" }}<br>
+                            <strong>Last Updated:</strong> {{ order.updated_at|date:"F j, Y g:i A" }}<br>
+                            {% if order.email_sent %}
+                                <span class="text-success">
+                                    <i class="fas fa-check-circle"></i> Confirmation email sent
+                                </span>
+                            {% else %}
+                                <span class="text-warning">
+                                    <i class="fas fa-clock"></i> Email pending
+                                </span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex justify-content-end mt-3">
+                    <a href="{% url 'order_confirmation' order.id %}" class="btn btn-outline-primary btn-sm me-2">
+                        <i class="fas fa-eye"></i> View Details
+                    </a>
+                    {% if order.status == 'delivered' %}
+                        <button class="btn btn-success btn-sm" disabled>
+                            <i class="fas fa-download"></i> Download Available
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- Pagination -->
+        {% if orders.has_other_pages %}
+        <nav aria-label="Order history pagination">
+            <ul class="pagination justify-content-center">
+                {% if orders.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ orders.previous_page_number }}">
+                            <i class="fas fa-chevron-left"></i> Previous
+                        </a>
+                    </li>
+                {% endif %}
+
+                {% for num in orders.paginator.page_range %}
+                    {% if orders.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% elif num > orders.number|add:'-3' and num < orders.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if orders.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ orders.next_page_number }}">
+                            Next <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+
+{% else %}
+<!-- No Orders -->
+<div class="row">
+    <div class="col-12">
+        <div class="text-center py-5">
+            <i class="fas fa-shopping-bag fa-4x text-muted mb-4"></i>
+            <h3>No orders yet</h3>
+            <p class="text-muted mb-4">You haven't placed any orders yet. Start shopping to see your order history here!</p>
+            <a href="{% url 'book_list' %}" class="btn btn-primary btn-lg">
+                <i class="fas fa-book-open"></i> Browse Books
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Order Summary Card -->
+{% if orders %}
+<div class="row mt-4">
+    <div class="col-md-6 offset-md-3">
+        <div class="card">
+            <div class="card-header text-center">
+                <h6 class="mb-0">
+                    <i class="fas fa-chart-pie"></i> Order Summary
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-4">
+                        <h4 class="text-primary">{{ orders.paginator.count }}</h4>
+                        <small>Total Orders</small>
+                    </div>
+                    <div class="col-4">
+                        <h4 class="text-success">{{ total_items|default:"0" }}</h4>
+                        <small>Books Purchased</small>
+                    </div>
+                    <div class="col-4">
+                        <h4 class="text-info">${{ total_spent|default:"0.00" }}</h4>
+                        <small>Total Spent</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        border: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .table th {
+        border-top: none;
+        font-weight: 600;
+    }
+
+    .badge {
+        font-size: 0.8rem;
+    }
+
+    address {
+        margin-bottom: 0;
+    }
+
+    .pagination .page-link {
+        color: #007bff;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,333 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block title %}Books - Online Bookstore{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-5">
+            <i class="fas fa-book-open"></i> Our Book Collection
+        </h1>
+        <p class="lead text-muted">Discover your next favorite book from our extensive collection</p>
+    </div>
+</div>
+
+<!-- Search and Filter Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <form method="GET" action="{% url 'book_list' %}">
+                    <div class="row g-3">
+                        <!-- Search Input -->
+                        <div class="col-md-6">
+                            <label for="search" class="form-label">Search Books</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                <input type="text" class="form-control" id="search" name="query"
+                                       placeholder="Search by title, author, or description..."
+                                       value="{{ current_query }}">
+                            </div>
+                        </div>
+
+                        <!-- Category Filter -->
+                        <div class="col-md-3">
+                            <label for="category" class="form-label">Category</label>
+                            <select class="form-select" id="category" name="category">
+                                <option value="all" {% if current_category == 'all' %}selected{% endif %}>All Categories</option>
+                                <option value="fiction" {% if current_category == 'fiction' %}selected{% endif %}>Fiction</option>
+                                <option value="non-fiction" {% if current_category == 'non-fiction' %}selected{% endif %}>Non-Fiction</option>
+                                <option value="science" {% if current_category == 'science' %}selected{% endif %}>Science</option>
+                                <option value="technology" {% if current_category == 'technology' %}selected{% endif %}>Technology</option>
+                                <option value="history" {% if current_category == 'history' %}selected{% endif %}>History</option>
+                                <option value="biography" {% if current_category == 'biography' %}selected{% endif %}>Biography</option>
+                            </select>
+                        </div>
+
+                        <!-- Sort Options -->
+                        <div class="col-md-3">
+                            <label for="sort" class="form-label">Sort By</label>
+                            <select class="form-select" id="sort" name="sort_by">
+                                <option value="-created_at" {% if current_sort == '-created_at' %}selected{% endif %}>Newest First</option>
+                                <option value="created_at" {% if current_sort == 'created_at' %}selected{% endif %}>Oldest First</option>
+                                <option value="title" {% if current_sort == 'title' %}selected{% endif %}>Title A-Z</option>
+                                <option value="-title" {% if current_sort == '-title' %}selected{% endif %}>Title Z-A</option>
+                                <option value="price" {% if current_sort == 'price' %}selected{% endif %}>Price Low to High</option>
+                                <option value="-price" {% if current_sort == '-price' %}selected{% endif %}>Price High to Low</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Filter Buttons -->
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-filter"></i> Apply Filters
+                            </button>
+                            <a href="{% url 'book_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i> Clear Filters
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search Results Info -->
+{% if current_query %}
+<div class="row mb-3">
+    <div class="col-12">
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i>
+            Showing search results for "<strong>{{ current_query }}</strong>" -
+            {{ page_obj.paginator.count }} book{{ page_obj.paginator.count|pluralize }} found
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Featured Books Section -->
+{% if featured_books and not current_query %}
+<div class="row mb-5">
+    <div class="col-12">
+        <h3 class="mb-3">
+            <i class="fas fa-star text-warning"></i> Featured Books
+        </h3>
+        <div class="row">
+            {% for book in featured_books %}
+            <div class="col-md-4 mb-3">
+                <div class="card h-100 border-warning">
+                    {% if book.cover_image %}
+                        <img src="{{ book.cover_image.url }}" class="card-img-top" alt="{{ book.title }}" style="height: 200px; object-fit: cover;">
+                    {% else %}
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <i class="fas fa-book fa-3x text-muted"></i>
+                        </div>
+                    {% endif %}
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ book.title }}</h5>
+                        <p class="card-text text-muted">by {{ book.author }}</p>
+                        <p class="card-text flex-grow-1">{{ book.description|truncatewords:15 }}</p>
+                        <div class="mt-auto">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="h5 text-primary mb-0">${{ book.price }}</span>
+                                <a href="{% url 'book_detail' book.pk %}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-eye"></i> View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Books Grid -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h3 class="mb-3">
+            {% if current_query %}
+                Search Results
+            {% else %}
+                All Books
+            {% endif %}
+            <span class="badge bg-secondary">{{ page_obj.paginator.count }}</span>
+        </h3>
+    </div>
+</div>
+
+{% if books %}
+<div class="row">
+    {% for book in books %}
+    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+        <div class="card h-100 shadow-sm book-card">
+            {% if book.cover_image %}
+                <img src="{{ book.cover_image.url }}" class="card-img-top" alt="{{ book.title }}" style="height: 250px; object-fit: cover;">
+            {% else %}
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 250px;">
+                    <i class="fas fa-book fa-3x text-muted"></i>
+                </div>
+            {% endif %}
+
+            <!-- Featured Badge -->
+            {% if book.is_featured %}
+                <div class="position-absolute top-0 end-0 m-2">
+                    <span class="badge bg-warning text-dark">
+                        <i class="fas fa-star"></i> Featured
+                    </span>
+                </div>
+            {% endif %}
+
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">{{ book.title|truncatechars:40 }}</h5>
+                <p class="card-text text-muted">
+                    <i class="fas fa-user"></i> {{ book.author }}
+                </p>
+                <p class="card-text small text-muted">
+                    <i class="fas fa-barcode"></i> ISBN: {{ book.isbn }}
+                </p>
+                <p class="card-text flex-grow-1">{{ book.description|truncatewords:12 }}</p>
+
+                <!-- Stock Status -->
+                <div class="mb-2">
+                    {% if book.stock_quantity > 0 %}
+                        <span class="badge bg-success">
+                            <i class="fas fa-check"></i> In Stock ({{ book.stock_quantity }})
+                        </span>
+                    {% else %}
+                        <span class="badge bg-danger">
+                            <i class="fas fa-times"></i> Out of Stock
+                        </span>
+                    {% endif %}
+                </div>
+
+                <div class="mt-auto">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="h5 text-primary mb-0">${{ book.price }}</span>
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'book_detail' book.pk %}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                            {% if book.stock_quantity > 0 and user.is_authenticated %}
+                                <form method="post" action="{% url 'add_to_cart' book.pk %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="quantity" value="1">
+                                    <button type="submit" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-cart-plus"></i> Add to Cart
+                                    </button>
+                                </form>
+                            {% elif not user.is_authenticated %}
+                                <a href="{% url 'login' %}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-sign-in-alt"></i> Login to Buy
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if page_obj.has_other_pages %}
+<nav aria-label="Book pagination">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?{% if current_query %}query={{ current_query }}&{% endif %}{% if current_category != 'all' %}category={{ current_category }}&{% endif %}{% if current_sort %}sort_by={{ current_sort }}&{% endif %}page={{ page_obj.previous_page_number }}">
+                    <i class="fas fa-chevron-left"></i> Previous
+                </a>
+            </li>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+                <li class="page-item active">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% if current_query %}query={{ current_query }}&{% endif %}{% if current_category != 'all' %}category={{ current_category }}&{% endif %}{% if current_sort %}sort_by={{ current_sort }}&{% endif %}page={{ num }}">{{ num }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?{% if current_query %}query={{ current_query }}&{% endif %}{% if current_category != 'all' %}category={{ current_category }}&{% endif %}{% if current_sort %}sort_by={{ current_sort }}&{% endif %}page={{ page_obj.next_page_number }}">
+                    Next <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<!-- No Books Found -->
+<div class="row">
+    <div class="col-12">
+        <div class="text-center py-5">
+            <i class="fas fa-search fa-4x text-muted mb-3"></i>
+            <h3>No books found</h3>
+            <p class="text-muted">
+                {% if current_query %}
+                    No books match your search criteria. Try different keywords or browse all books.
+                {% else %}
+                    There are no books available at the moment.
+                {% endif %}
+            </p>
+            {% if current_query %}
+                <a href="{% url 'book_list' %}" class="btn btn-primary">
+                    <i class="fas fa-th-large"></i> Browse All Books
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Back to Top Button -->
+<button type="button" class="btn btn-primary btn-floating position-fixed bottom-0 end-0 m-4" id="backToTop" style="display: none;">
+    <i class="fas fa-chevron-up"></i>
+</button>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .book-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .book-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .btn-floating {
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        z-index: 1000;
+    }
+
+    .position-absolute {
+        z-index: 2;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Back to top button functionality
+    window.addEventListener('scroll', function() {
+        const backToTopBtn = document.getElementById('backToTop');
+        if (window.scrollY > 300) {
+            backToTopBtn.style.display = 'block';
+        } else {
+            backToTopBtn.style.display = 'none';
+        }
+    });
+
+    document.getElementById('backToTop').addEventListener('click', function() {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+
+    // Auto-submit form when sort option changes
+    document.getElementById('sort').addEventListener('change', function() {
+        this.form.submit();
+    });
+</script>
+{% endblock %}

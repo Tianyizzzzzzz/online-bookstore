@@ -1,0 +1,276 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block title %}Order Confirmation - Online Bookstore{% endblock %}
+
+{% block content %}
+<!-- Success Message -->
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="text-center mb-4">
+            <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+            <h1 class="display-4 text-success">Order Confirmed!</h1>
+            <p class="lead">Thank you for your purchase. Your order has been successfully placed.</p>
+        </div>
+
+        <!-- Order Details Card -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-receipt"></i> Order Details
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Order Information</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>Order Number:</strong> {{ order.order_number }}</li>
+                            <li><strong>Order Date:</strong> {{ order.created_at|date:"F j, Y g:i A" }}</li>
+                            <li><strong>Status:</strong>
+                                <span class="badge bg-warning">{{ order.get_status_display }}</span>
+                            </li>
+                            <li><strong>Total Amount:</strong>
+                                <span class="text-primary fw-bold">${{ order.total_amount }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Customer Information</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>Name:</strong> {{ order.user.get_full_name }}</li>
+                            <li><strong>Email:</strong> {{ order.user.email }}</li>
+                            <li><strong>Username:</strong> {{ order.user.username }}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ordered Items -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-book"></i> Ordered Items
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Book</th>
+                                <th>Author</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order.items.all %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        {% if item.book.cover_image %}
+                                            <img src="{{ item.book.cover_image.url }}" alt="{{ item.book.title }}"
+                                                 class="me-2 rounded" style="width: 40px; height: 50px; object-fit: cover;">
+                                        {% endif %}
+                                        <div>
+                                            <strong>{{ item.book.title }}</strong><br>
+                                            <small class="text-muted">ISBN: {{ item.book.isbn }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ item.book.author }}</td>
+                                <td>${{ item.price }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td><strong>${{ item.total_price }}</strong></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="4" class="text-end">Total:</th>
+                                <th class="text-primary">${{ order.total_amount }}</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Shipping Information -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-map-marker-alt"></i> Billing Address
+                </h5>
+            </div>
+            <div class="card-body">
+                <address>
+                    <strong>{{ order.user.get_full_name }}</strong><br>
+                    {{ order.shipping_address }}<br>
+                    {{ order.shipping_city }}, {{ order.shipping_state }} {{ order.shipping_zip_code }}<br>
+                    {{ order.shipping_country }}
+                </address>
+            </div>
+        </div>
+
+        <!-- What's Next -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle"></i> What's Next?
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-envelope text-primary"></i> Email Confirmation</h6>
+                        <p>A confirmation email with your order details and download links has been sent to <strong>{{ order.user.email }}</strong>.</p>
+
+                        <h6><i class="fas fa-download text-success"></i> Download Your eBooks</h6>
+                        <p>Your eBooks are attached to the confirmation email as PDF files. You can download them immediately.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-history text-info"></i> Order History</h6>
+                        <p>You can view all your orders and re-download your eBooks anytime from your account.</p>
+
+                        <h6><i class="fas fa-headset text-warning"></i> Need Help?</h6>
+                        <p>If you have any questions or need assistance, our customer support team is available 24/7.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="text-center mb-4">
+            <a href="{% url 'order_history' %}" class="btn btn-primary btn-lg me-2">
+                <i class="fas fa-history"></i> View Order History
+            </a>
+            <a href="{% url 'book_list' %}" class="btn btn-outline-primary btn-lg">
+                <i class="fas fa-book-open"></i> Continue Shopping
+            </a>
+        </div>
+
+        <!-- Email Status -->
+        {% if order.email_sent %}
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle"></i>
+            <strong>Email Sent!</strong> Your order confirmation and eBooks have been sent to {{ order.user.email }}.
+        </div>
+        {% else %}
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>Email Pending:</strong> Your confirmation email is being processed and will be sent shortly.
+        </div>
+        {% endif %}
+
+        <!-- Support Information -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-question-circle"></i> Need Help?
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        <i class="fas fa-envelope fa-2x text-primary mb-2"></i>
+                        <h6>Email Support</h6>
+                        <p>{{ store_email }}</p>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <i class="fas fa-phone fa-2x text-success mb-2"></i>
+                        <h6>Phone Support</h6>
+                        <p>{{ store_phone }}</p>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <i class="fas fa-clock fa-2x text-info mb-2"></i>
+                        <h6>Support Hours</h6>
+                        <p>24/7 Available</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        border: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 1rem;
+    }
+
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .table th {
+        border-top: none;
+        font-weight: 600;
+    }
+
+    .badge {
+        font-size: 0.8rem;
+    }
+
+    .display-4 {
+        font-weight: 300;
+    }
+
+    .text-success {
+        color: #28a745 !important;
+    }
+
+    .btn-lg {
+        padding: 0.75rem 1.5rem;
+        font-size: 1.1rem;
+    }
+
+    address {
+        margin-bottom: 0;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Print order functionality
+    function printOrder() {
+        window.print();
+    }
+
+    // Auto-scroll to top on page load
+    window.onload = function() {
+        window.scrollTo(0, 0);
+    };
+
+    // Confetti animation (optional)
+    document.addEventListener('DOMContentLoaded', function() {
+        // Simple celebration animation
+        const successIcon = document.querySelector('.fa-check-circle');
+        if (successIcon) {
+            successIcon.style.animation = 'pulse 2s infinite';
+        }
+    });
+</script>
+
+<style>
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.1);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+</style>
+{% endblock %}

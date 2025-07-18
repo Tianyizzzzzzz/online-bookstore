@@ -1,0 +1,204 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block title %}Home - Online Bookstore{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section bg-primary text-white p-5 mb-5 rounded">
+    <div class="row align-items-center">
+        <div class="col-md-6">
+            <h1 class="display-4">{{ store_name }}</h1>
+            <p class="lead">{{ store_tagline }}</p>
+            <p class="mb-4">Discover thousands of books and get instant access to your favorite eBooks. 
+               Start your reading journey today!</p>
+            <a href="{% url 'book_list' %}" class="btn btn-light btn-lg">
+                <i class="fas fa-book-open"></i> Browse Books
+            </a>
+        </div>
+        <div class="col-md-6 text-center">
+            <i class="fas fa-books fa-10x opacity-50"></i>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="row mb-5">
+    <div class="col-md-4 text-center mb-4">
+        <div class="feature-box p-4 h-100">
+            <i class="fas fa-download fa-3x text-primary mb-3"></i>
+            <h4>Instant Download</h4>
+            <p>Get your eBooks instantly after purchase. No waiting, no shipping - just immediate access to your digital library.</p>
+        </div>
+    </div>
+    <div class="col-md-4 text-center mb-4">
+        <div class="feature-box p-4 h-100">
+            <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
+            <h4>Secure Payments</h4>
+            <p>Shop with confidence using our secure payment system. Your personal and financial information is always protected.</p>
+        </div>
+    </div>
+    <div class="col-md-4 text-center mb-4">
+        <div class="feature-box p-4 h-100">
+            <i class="fas fa-headset fa-3x text-primary mb-3"></i>
+            <h4>24/7 Support</h4>
+            <p>Our customer support team is available around the clock to help you with any questions or issues.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Featured Books Section -->
+{% if featured_books %}
+<div class="mb-5">
+    <h2 class="text-center mb-4">Featured Books</h2>
+    <div class="row">
+        {% for book in featured_books %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                {% if book.cover_image %}
+                    <img src="{{ book.cover_image.url }}" class="card-img-top" alt="{{ book.title }}" style="height: 250px; object-fit: cover;">
+                {% else %}
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 250px;">
+                        <i class="fas fa-book fa-3x text-muted"></i>
+                    </div>
+                {% endif %}
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">{{ book.title }}</h5>
+                    <p class="card-text text-muted">by {{ book.author }}</p>
+                    <p class="card-text flex-grow-1">{{ book.description|truncatewords:20 }}</p>
+                    <div class="mt-auto">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="h5 text-primary mb-0">${{ book.price }}</span>
+                            <a href="{% url 'book_detail' book.pk %}" class="btn btn-primary">
+                                <i class="fas fa-eye"></i> View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="text-center mt-4">
+        <a href="{% url 'book_list' %}" class="btn btn-outline-primary">
+            <i class="fas fa-th-large"></i> View All Books
+        </a>
+    </div>
+</div>
+{% endif %}
+
+<!-- Recent Books Section -->
+{% if recent_books %}
+<div class="mb-5">
+    <h2 class="text-center mb-4">Recently Added</h2>
+    <div class="row">
+        {% for book in recent_books %}
+        <div class="col-md-3 col-sm-6 mb-4">
+            <div class="card h-100 shadow-sm">
+                {% if book.cover_image %}
+                    <img src="{{ book.cover_image.url }}" class="card-img-top" alt="{{ book.title }}" style="height: 200px; object-fit: cover;">
+                {% else %}
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                        <i class="fas fa-book fa-2x text-muted"></i>
+                    </div>
+                {% endif %}
+                <div class="card-body d-flex flex-column">
+                    <h6 class="card-title">{{ book.title|truncatechars:30 }}</h6>
+                    <p class="card-text text-muted small">{{ book.author }}</p>
+                    <div class="mt-auto">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-primary fw-bold">${{ book.price }}</span>
+                            <a href="{% url 'book_detail' book.pk %}" class="btn btn-sm btn-outline-primary">
+                                View
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Newsletter Signup Section -->
+<div class="bg-light p-4 rounded mb-5">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h4>Stay Updated</h4>
+            <p class="mb-0">Subscribe to our newsletter to get notified about new book releases and special offers.</p>
+        </div>
+        <div class="col-md-4">
+            <form class="d-flex">
+                <input type="email" class="form-control me-2" placeholder="Enter your email">
+                <button class="btn btn-primary" type="submit">
+                    <i class="fas fa-paper-plane"></i> Subscribe
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Section -->
+<div class="row text-center mb-5">
+    <div class="col-md-3">
+        <div class="stat-box">
+            <i class="fas fa-book fa-2x text-primary mb-2"></i>
+            <h3>1000+</h3>
+            <p>Books Available</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-box">
+            <i class="fas fa-users fa-2x text-primary mb-2"></i>
+            <h3>5000+</h3>
+            <p>Happy Customers</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-box">
+            <i class="fas fa-star fa-2x text-primary mb-2"></i>
+            <h3>4.8</h3>
+            <p>Average Rating</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-box">
+            <i class="fas fa-shipping-fast fa-2x text-primary mb-2"></i>
+            <h3>Instant</h3>
+            <p>Delivery</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+    }
+    
+    .feature-box {
+        border: 1px solid #e9ecef;
+        border-radius: 10px;
+        transition: transform 0.3s ease;
+    }
+    
+    .feature-box:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .card {
+        transition: transform 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-3px);
+    }
+    
+    .stat-box {
+        padding: 20px;
+    }
+</style>
+{% endblock %}

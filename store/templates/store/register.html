@@ -1,0 +1,332 @@
+{% extends 'store/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Register - Online Bookstore{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow">
+            <div class="card-header text-center">
+                <h3 class="mb-0">
+                    <i class="fas fa-user-plus"></i> Create Account
+                </h3>
+                <p class="text-muted mb-0">Join our community of book lovers</p>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="row">
+                        <!-- First Name -->
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.first_name.id_for_label }}" class="form-label">
+                                <i class="fas fa-user"></i> First Name
+                            </label>
+                            {{ form.first_name }}
+                            {% if form.first_name.errors %}
+                                <div class="text-danger small">
+                                    {{ form.first_name.errors|first }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Last Name -->
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.last_name.id_for_label }}" class="form-label">
+                                <i class="fas fa-user"></i> Last Name
+                            </label>
+                            {{ form.last_name }}
+                            {% if form.last_name.errors %}
+                                <div class="text-danger small">
+                                    {{ form.last_name.errors|first }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Username -->
+                    <div class="mb-3">
+                        <label for="{{ form.username.id_for_label }}" class="form-label">
+                            <i class="fas fa-at"></i> Username
+                        </label>
+                        {{ form.username }}
+                        {% if form.username.errors %}
+                            <div class="text-danger small">
+                                {{ form.username.errors|first }}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">
+                            <i class="fas fa-info-circle"></i>
+                            Letters, digits and @/./+/-/_ only. 150 characters or fewer.
+                        </div>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="mb-3">
+                        <label for="{{ form.email.id_for_label }}" class="form-label">
+                            <i class="fas fa-envelope"></i> Email Address
+                        </label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <div class="text-danger small">
+                                {{ form.email.errors|first }}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">
+                            <i class="fas fa-info-circle"></i>
+                            We'll send your order confirmations and eBooks to this address.
+                        </div>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="mb-3">
+                        <label for="{{ form.password1.id_for_label }}" class="form-label">
+                            <i class="fas fa-lock"></i> Password
+                        </label>
+                        {{ form.password1 }}
+                        {% if form.password1.errors %}
+                            <div class="text-danger small">
+                                {{ form.password1.errors|first }}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">
+                            <i class="fas fa-info-circle"></i>
+                            Your password must contain at least 8 characters and can't be too common.
+                        </div>
+                    </div>
+
+                    <!-- Confirm Password -->
+                    <div class="mb-3">
+                        <label for="{{ form.password2.id_for_label }}" class="form-label">
+                            <i class="fas fa-lock"></i> Confirm Password
+                        </label>
+                        {{ form.password2 }}
+                        {% if form.password2.errors %}
+                            <div class="text-danger small">
+                                {{ form.password2.errors|first }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Terms and Conditions -->
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="terms" required>
+                        <label class="form-check-label" for="terms">
+                            I agree to the
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">
+                                Terms and Conditions
+                            </a> and
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#privacyModal">
+                                Privacy Policy
+                            </a>
+                        </label>
+                    </div>
+
+                    <!-- Newsletter Subscription -->
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="newsletter" checked>
+                        <label class="form-check-label" for="newsletter">
+                            Subscribe to our newsletter for book recommendations and special offers
+                        </label>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-user-plus"></i> Create Account
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-center">
+                <p class="mb-0">
+                    Already have an account?
+                    <a href="{% url 'login' %}" class="text-decoration-none">
+                        <i class="fas fa-sign-in-alt"></i> Sign in here
+                    </a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Benefits Section -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-star"></i> Why Join {{ store_name }}?
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="fas fa-download text-primary"></i>
+                                Instant access to thousands of eBooks
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-heart text-primary"></i>
+                                Personalized book recommendations
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-history text-primary"></i>
+                                Order history and easy re-downloads
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="fas fa-tag text-primary"></i>
+                                Exclusive member discounts
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-bell text-primary"></i>
+                                Early access to new releases
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-headset text-primary"></i>
+                                24/7 customer support
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Terms and Conditions Modal -->
+<div class="modal fade" id="termsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Terms and Conditions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6>1. Account Registration</h6>
+                <p>By creating an account, you agree to provide accurate and complete information.</p>
+
+                <h6>2. Digital Products</h6>
+                <p>All books are delivered digitally. You will receive download links via email.</p>
+
+                <h6>3. Usage Rights</h6>
+                <p>Digital products are licensed for personal use only. Sharing or redistributing is prohibited.</p>
+
+                <h6>4. Refund Policy</h6>
+                <p>We offer a 30-day money-back guarantee for all digital products.</p>
+
+                <h6>5. Account Security</h6>
+                <p>You are responsible for maintaining the security of your account credentials.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Privacy Policy Modal -->
+<div class="modal fade" id="privacyModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Privacy Policy</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6>1. Information Collection</h6>
+                <p>We collect information necessary to provide our services, including name, email, and payment details.</p>
+
+                <h6>2. Information Usage</h6>
+                <p>Your information is used to process orders, send products, and provide customer support.</p>
+
+                <h6>3. Data Security</h6>
+                <p>We implement industry-standard security measures to protect your personal information.</p>
+
+                <h6>4. Third-Party Services</h6>
+                <p>We may use third-party services for payment processing and email delivery.</p>
+
+                <h6>5. Contact Information</h6>
+                <p>For privacy concerns, contact us at privacy@onlinebookstore.com</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        border: none;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+    }
+
+    .form-control {
+        border-radius: 0.5rem;
+    }
+
+    .form-control:focus {
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    }
+
+    .form-check-input:checked {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+
+    .text-primary {
+        color: #007bff !important;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Form validation
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        const termsCheckbox = document.getElementById('terms');
+
+        form.addEventListener('submit', function(e) {
+            if (!termsCheckbox.checked) {
+                e.preventDefault();
+                alert('Please accept the terms and conditions to continue.');
+                return false;
+            }
+
+            // Add loading state
+            const submitBtn = form.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+            submitBtn.disabled = true;
+        });
+
+        // Real-time password validation
+        const password1 = document.getElementById('{{ form.password1.id_for_label }}');
+        const password2 = document.getElementById('{{ form.password2.id_for_label }}');
+
+        function validatePasswords() {
+            if (password1.value && password2.value) {
+                if (password1.value !== password2.value) {
+                    password2.setCustomValidity('Passwords do not match');
+                } else {
+                    password2.setCustomValidity('');
+                }
+            }
+        }
+
+        password1.addEventListener('input', validatePasswords);
+        password2.addEventListener('input', validatePasswords);
+    });
+</script>
+{% endblock %}
